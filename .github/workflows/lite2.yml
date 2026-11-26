@@ -1,0 +1,46 @@
+name: Lite2 Build
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/lite2.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: Patch
+        run: echo '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' | base64 -d | gunzip > /tmp/patch.py && python3 /tmp/patch.py
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Build
+        run: ./gradlew :app:assembleBenchmark --no-daemon --stacktrace > /tmp/build.log 2>&1
+      - name: Publish
+        if: success()
+        run: |
+          APK=$(ls app/build/outputs/apk/benchmark/*arm64-v8a*.apk | head -1)
+          AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 | tail -1)
+          $AAPT dump badging "$APK" | head -3 > /tmp/notes.txt
+          ls -l "$APK" >> /tmp/notes.txt
+          gh release create lite2-r${{ github.run_number }} "$APK" --title "lite2 run ${{ github.run_number }}" --notes-file /tmp/notes.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Publish log
+        if: always()
+        run: |
+          grep -E "^e: |error:|FAILED|What went wrong|Caused by|Execution failed|BUILD " /tmp/build.log | head -150 | cut -c1-400 > /tmp/err.txt || true
+          [ -s /tmp/err.txt ] || echo "no errors found" > /tmp/err.txt
+          tail -60 /tmp/build.log | cut -c1-300 >> /tmp/err.txt
+          gzip -k /tmp/build.log
+          gh release create log-r${{ github.run_number }} /tmp/build.log.gz --prerelease --title "log ${{ github.run_number }}" --notes-file /tmp/err.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
