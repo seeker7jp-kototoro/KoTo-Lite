@@ -1,0 +1,48 @@
+name: Lite2 NoTranslate Build
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/lite2nt.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: Kototoro-app/Kototoro
+          ref: v2.5.3
+          submodules: recursive
+      - name: Patch
+        run: echo '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' | base64 -d | gunzip > /tmp/patch.py && python3 /tmp/patch.py
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Build
+        run: ./gradlew :app:assembleBenchmark --no-daemon --stacktrace > /tmp/build.log 2>&1
+      - name: Publish
+        if: success()
+        run: |
+          APK=$(ls app/build/outputs/apk/benchmark/*arm64-v8a*.apk | head -1)
+          AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 | tail -1)
+          $AAPT dump badging "$APK" | head -3 > /tmp/notes.txt
+          ls -l "$APK" >> /tmp/notes.txt
+          gh release create -R ${{ github.repository }} lite2nt-r${{ github.run_number }} "$APK" --title "lite2nt run ${{ github.run_number }}" --notes-file /tmp/notes.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Publish log
+        if: always()
+        run: |
+          grep -E "^e: |error:|FAILED|What went wrong|Caused by|Execution failed|BUILD " /tmp/build.log | head -150 | cut -c1-400 > /tmp/err.txt || true
+          [ -s /tmp/err.txt ] || echo "no errors found" > /tmp/err.txt
+          tail -60 /tmp/build.log | cut -c1-300 >> /tmp/err.txt
+          gzip -k /tmp/build.log
+          gh release create -R ${{ github.repository }} lognt-r${{ github.run_number }} /tmp/build.log.gz --prerelease --title "log ${{ github.run_number }}" --notes-file /tmp/err.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
