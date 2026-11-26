@@ -1,0 +1,25 @@
+name: Publish Lite APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: Kototoro-lite-arm64-v8a
+          path: dl
+          run-id: 45802482988
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la dl
+          gh release create lite-1 dl/*.apk --title "Kototoro Lite arm64-v8a" --notes "Untested build: arm64-v8a only, shrunk, app id ends with .lite (installs next to the original app)."
