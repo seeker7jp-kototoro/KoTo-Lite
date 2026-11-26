@@ -1,0 +1,45 @@
+name: Lite Build (arm64-v8a)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: Add lite build type to app/build.gradle
+        run: |
+          python3 - <<'PY'
+          p = 'app/build.gradle'
+          s = open(p).read()
+          a = "requestedTaskNames.any { it.contains('debug') } &&"
+          b = "requestedTaskNames.any { it.contains('debug') || it.contains('lite') } &&"
+          assert a in s
+          s = s.replace(a, b, 1)
+          c = "\t\tnightly {\n\t\t\tinitWith release"
+          d = "\t\tlite {\n\t\t\tinitWith release\n\t\t\tapplicationIdSuffix = '.lite'\n\t\t\tsigningConfig signingConfigs.debug\n\t\t\tmatchingFallbacks = ['release']\n\t\t}\n" + c
+          assert c in s
+          s = s.replace(c, d, 1)
+          open(p, 'w').write(s)
+          PY
+          git diff
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+      - run: chmod +x gradlew
+      - name: Build Lite APK
+        run: ./gradlew :app:assembleLite --no-daemon --stacktrace
+      - run: find app/build/outputs/apk -name "*.apk" -type f
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Kototoro-lite-arm64-v8a
+          path: app/build/outputs/apk/lite/*arm64-v8a*.apk
+          if-no-files-found: error
