@@ -1,0 +1,60 @@
+name: KoTo Lite Release
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kotolite.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: Kototoro-app/Kototoro
+          ref: v2.5.3
+          submodules: recursive
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          ref: devel
+          path: lite
+          sparse-checkout: .github/workflows
+      - name: Patch (same patch as lite2nt)
+        run: |
+          grep -oP "echo '\K[A-Za-z0-9+/=]+(?=')" lite/.github/workflows/lite2nt.yml | tr -d '\n' | base64 -d | gunzip > /tmp/patch.py
+          python3 /tmp/patch.py
+      - name: Patch notification icon
+        run: |
+          echo 'aW1wb3J0IHJlCmRlZiByZChwKTogcmV0dXJuIG9wZW4ocCwgZW5jb2Rpbmc9J3V0Zi04JykucmVhZCgpCmRlZiB3cihwLCBzKTogb3BlbihwLCAndycsIGVuY29kaW5nPSd1dGYtOCcpLndyaXRlKHMpClIgPSAnYXBwL3NyYy9tYWluL3Jlcy8nCnggPSByZChSICsgJ2RyYXdhYmxlL2tvdG9faWNfbW9uby54bWwnKQpkID0gcmUuZmluZGFsbChyJ2FuZHJvaWQ6cGF0aERhdGE9IihbXiJdKykiJywgeCkKbnVtcyA9IFtmbG9hdChuKSBmb3IgZGQgaW4gZCBmb3IgbiBpbiByZS5maW5kYWxsKHInLT9cZCtcLj9cZConLCBkZCldCnhzLCB5cyA9IG51bXNbMDo6Ml0sIG51bXNbMTo6Ml0KeDAsIHgxLCB5MCwgeTEgPSBtaW4oeHMpLCBtYXgoeHMpLCBtaW4oeXMpLCBtYXgoeXMpCnNpZGUgPSBtYXgoeDEgLSB4MCwgeTEgLSB5MCkgKiAxLjA2CmN4LCBjeSA9ICh4MCArIHgxKSAvIDIsICh5MCArIHkxKSAvIDIKb3gsIG95ID0gY3ggLSBzaWRlIC8gMiwgY3kgLSBzaWRlIC8gMgpwYXRocyA9ICcnLmpvaW4oJyAgICAgICAgPHBhdGggYW5kcm9pZDpmaWxsQ29sb3I9IiNGRkZGRkYiIGFuZHJvaWQ6ZmlsbFR5cGU9ImV2ZW5PZGQiIGFuZHJvaWQ6cGF0aERhdGE9IiVzIi8+XG4nICUgZGQgZm9yIGRkIGluIGQpCm91dCA9ICgnPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz5cbjx2ZWN0b3IgeG1sbnM6YW5kcm9pZD0iaHR0cDovL3NjaGVtYXMuYW5kcm9pZC5jb20vYXBrL3Jlcy9hbmRyb2lkIlxuJwogICAgICAgJyAgICBhbmRyb2lkOndpZHRoPSIyNGRwIlxuICAgIGFuZHJvaWQ6aGVpZ2h0PSIyNGRwIlxuICAgIGFuZHJvaWQ6dmlld3BvcnRXaWR0aD0iJS4yZiJcbiAgICBhbmRyb2lkOnZpZXdwb3J0SGVpZ2h0PSIlLjJmIj5cbicKICAgICAgICcgICAgPGdyb3VwIGFuZHJvaWQ6dHJhbnNsYXRlWD0iJS4yZiIgYW5kcm9pZDp0cmFuc2xhdGVZPSIlLjJmIj5cbiVzICAgIDwvZ3JvdXA+XG48L3ZlY3Rvcj5cbicpICUgKHNpZGUsIHNpZGUsIC1veCwgLW95LCBwYXRocykKd3IoUiArICdkcmF3YWJsZS9rb3RvX2ljX3N0YXQueG1sJywgb3V0KQpmID0gJ2FwcC9zcmMvbWFpbi9rb3RsaW4vb3JnL3NrZXBzdW4va290b3Rvcm8vZG93bmxvYWQvdWkvd29ya2VyL0Rvd25sb2FkTm90aWZpY2F0aW9uRmFjdG9yeS5rdCcKayA9IHJkKGYpCm4gPSBrLmNvdW50KCdhbmRyb2lkLlIuZHJhd2FibGUuc3RhdF8nKQprID0gay5yZXBsYWNlKCdhbmRyb2lkLlIuZHJhd2FibGUuc3RhdF9zeXNfZG93bmxvYWRfZG9uZScsICdSLmRyYXdhYmxlLmtvdG9faWNfc3RhdCcpLnJlcGxhY2UoJ2FuZHJvaWQuUi5kcmF3YWJsZS5zdGF0X3N5c19kb3dubG9hZCcsICdSLmRyYXdhYmxlLmtvdG9faWNfc3RhdCcpLnJlcGxhY2UoJ2FuZHJvaWQuUi5kcmF3YWJsZS5zdGF0X25vdGlmeV9lcnJvcicsICdSLmRyYXdhYmxlLmtvdG9faWNfc3RhdCcpLnJlcGxhY2UoJ1IuZHJhd2FibGUuaWNfc3RhdF9wYXVzZWQnLCAnUi5kcmF3YWJsZS5rb3RvX2ljX3N0YXQnKQphc3NlcnQgJ2FuZHJvaWQuUi5kcmF3YWJsZS5zdGF0Xycgbm90IGluIGsgYW5kICdrb3RvX2ljX3N0YXQnIGluIGsKd3IoZiwgaykKcHJpbnQoJ3JlcGxhY2VkJywgbiwgJ2Jib3gnLCB4MCwgeDEsIHkwLCB5MSkK' | base64 -d > /tmp/stat_icon.py
+          python3 /tmp/stat_icon.py
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Build
+        run: ./gradlew :app:assembleBenchmark --no-daemon --stacktrace > /tmp/build.log 2>&1
+      - name: Publish
+        if: success()
+        run: |
+          APK=$(ls app/build/outputs/apk/benchmark/*arm64-v8a*.apk | head -1)
+          VER=$(grep -oP "versionName = '\K[^']+" app/build.gradle | head -1)
+          cp "$APK" "/tmp/kotolite-$VER.apk"
+          printf '%s\n' "kotolite $VER (based on Kototoro $VER, no-translation build)" "" "What changed in this build:" "- Download notifications now use the KoTo Lite bear icon instead of the original app icon." "- Release and file are now named kotolite $VER." "- Same signing key as before, so it installs over the existing KoTo Lite." > /tmp/notes.txt
+          gh release create -R ${{ github.repository }} "kotolite-$VER-r${{ github.run_number }}" "/tmp/kotolite-$VER.apk" --title "kotolite $VER" --notes-file /tmp/notes.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Publish log
+        if: always()
+        run: |
+          grep -E "^e: |error:|FAILED|What went wrong|Caused by|Execution failed|BUILD " /tmp/build.log | head -150 | cut -c1-400 > /tmp/err.txt || true
+          [ -s /tmp/err.txt ] || echo "no errors found" > /tmp/err.txt
+          tail -60 /tmp/build.log | cut -c1-300 >> /tmp/err.txt
+          gzip -k /tmp/build.log
+          gh release create -R ${{ github.repository }} "logkl-r${{ github.run_number }}" /tmp/build.log.gz --prerelease --title "build log ${{ github.run_number }}" --notes-file /tmp/err.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
