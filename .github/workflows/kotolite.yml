@@ -51,6 +51,26 @@ jobs:
           PY
           python3 /tmp/totoro.py
           cp app/src/main/res/drawable/koto_ic_mono.xml app/src/main/res/drawable/ic_launcher_monochrome.xml
+      - name: Keep the Discover feed manga-only
+        run: |
+          cat > /tmp/disc.py <<'PY'
+          p = 'app/src/main/kotlin/org/skepsun/kototoro/explore/ui/DiscoveryFeedViewModel.kt'
+          s = open(p, encoding='utf-8').read()
+          a = "infos.map { it.mangaSource }.distinctBy { it.name }"
+          b = ".map { it.mangaSource }\n                .distinctBy { it.name },"
+          assert a in s and b in s
+          flt = ".filter { it.mangaSource.getContentType() !in KOTO_HIDDEN_TYPES }"
+          s = s.replace(a, "infos" + flt + ".map { it.mangaSource }.distinctBy { it.name }")
+          s = s.replace("contentSourcesRepository.observeEnabledSources().value\n                .map { it.mangaSource }",
+                        "contentSourcesRepository.observeEnabledSources().value\n                " + flt + "\n                .map { it.mangaSource }")
+          assert s.count('KOTO_HIDDEN_TYPES') == 2
+          s = s.rstrip('\n') + "\n\nprivate val KOTO_HIDDEN_TYPES = setOf(\n    org.skepsun.kototoro.parsers.model.ContentType.NOVEL,\n    org.skepsun.kototoro.parsers.model.ContentType.HENTAI_NOVEL,\n    org.skepsun.kototoro.parsers.model.ContentType.VIDEO,\n    org.skepsun.kototoro.parsers.model.ContentType.HENTAI_VIDEO,\n)\n"
+          s = s.replace("\nimport org.skepsun.kototoro.explore.data.ContentSourcesRepository", "\nimport org.skepsun.kototoro.core.model.getContentType\nimport org.skepsun.kototoro.explore.data.ContentSourcesRepository", 1)
+          assert 'import org.skepsun.kototoro.core.model.getContentType' in s
+          open(p, 'w', encoding='utf-8').write(s)
+          print('discover feed picker: video/novel sources hidden')
+          PY
+          python3 /tmp/disc.py
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -65,7 +85,7 @@ jobs:
           APK=$(ls app/build/outputs/apk/benchmark/*arm64-v8a*.apk | head -1)
           VER=$(grep -oP "versionName = '\K[^']+" app/build.gradle | head -1)
           cp "$APK" "/tmp/kotolite-$VER.apk"
-          printf '%s\n' "kotolite $VER (based on Kototoro $VER, no-translation build)" "" "What changed in this build:" "- Updated to upstream Kototoro $VER with all KoTo Lite changes carried over (manga-only UI, no image upscaling, torrent or translation, arm64 only)." "- Bear icons kept (launcher, download notification, shortcuts)." "- Same signing key as before, so it installs over the existing KoTo Lite." > /tmp/notes.txt
+          printf '%s\n' "kotolite $VER (based on Kototoro $VER, no-translation build)" "" "What changed in this build:" "- Updated to upstream Kototoro $VER with all KoTo Lite changes carried over (manga-only UI, no image upscaling, torrent or translation, arm64 only)." "- Bear icons kept (launcher, download notification, shortcuts)." "- New Discover feed: the source picker for adding rows hides video and novel sources, so the feed stays manga-only." "- Same signing key as before, so it installs over the existing KoTo Lite." > /tmp/notes.txt
           gh release create -R ${{ github.repository }} "kotolite-$VER-r${{ github.run_number }}" "/tmp/kotolite-$VER.apk" --title "kotolite $VER" --notes-file /tmp/notes.txt
         env:
           GH_TOKEN: ${{ github.token }}
