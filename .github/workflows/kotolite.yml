@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: Kototoro-app/Kototoro
-          ref: v2.5.3
+          ref: v2.5.5
           submodules: recursive
       - uses: actions/checkout@v5
         with:
@@ -65,7 +65,7 @@ jobs:
           APK=$(ls app/build/outputs/apk/benchmark/*arm64-v8a*.apk | head -1)
           VER=$(grep -oP "versionName = '\K[^']+" app/build.gradle | head -1)
           cp "$APK" "/tmp/kotolite-$VER.apk"
-          printf '%s\n' "kotolite $VER (based on Kototoro $VER, no-translation build)" "" "What changed in this build:" "- The default Totoro image (shown in the download notification tile and shortcuts) is replaced with the KoTo Lite bear icon." "- Download notification small icon is the bear (from the previous build)." "- The leftover Totoro monochrome launcher icon is replaced with the bear." "- Same signing key as before, so it installs over the existing KoTo Lite." > /tmp/notes.txt
+          printf '%s\n' "kotolite $VER (based on Kototoro $VER, no-translation build)" "" "What changed in this build:" "- Updated to upstream Kototoro $VER with all KoTo Lite changes carried over (manga-only UI, no image upscaling, torrent or translation, arm64 only)." "- Bear icons kept (launcher, download notification, shortcuts)." "- Same signing key as before, so it installs over the existing KoTo Lite." > /tmp/notes.txt
           gh release create -R ${{ github.repository }} "kotolite-$VER-r${{ github.run_number }}" "/tmp/kotolite-$VER.apk" --title "kotolite $VER" --notes-file /tmp/notes.txt
         env:
           GH_TOKEN: ${{ github.token }}
